@@ -24,7 +24,7 @@ io.on('connection',(socket)=>{
 
     socket.on('join',(params,callback)=>{
         
-        if(isRealString(params.name)&&isRealString(params.activeRoom)){
+        if(isRealString(params.room)&&isRealString(params.activeRoom)){
             callback('Error you have set two rooms,please choose either of them');
         }
         let roomName = params.room || params.activeRoom;
