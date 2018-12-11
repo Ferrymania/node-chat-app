@@ -67,4 +67,9 @@ describe('Users',()=>{
         let userList = users.getUserList('React');
         expect(userList).toEqual(['Julia'])
     });
+
+    it('Should return unique rooms ',()=>{
+        let rooms = users.getRoomList();
+        expect(rooms.length).toBe(2);
+    });
 });

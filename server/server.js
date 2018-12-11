@@ -15,32 +15,39 @@ let users = new Users();
 
 app.use(express.static(publicPath));
 
+app.get('/rooms',(req,res)=>{
+   res.send(users.getRoomList());
+});
 io.on('connection',(socket)=>{
     console.log('New user connected');
 
 
     socket.on('join',(params,callback)=>{
         
-        if(!isRealString(params.name) || !isRealString(params.room)){
-            callback('Name and room name are required');
+        if(isRealString(params.name)&&isRealString(params.activeRoom)){
+            callback('Error you have set two rooms,please choose either of them');
         }
+        let roomName = params.room || params.activeRoom;
+        if(!isRealString(params.name) || !isRealString(roomName) ){
+            callback('Name and room name are required');
+        } 
         
         // make room case insensitive
-        params.room = params.room.toLowerCase();
+        roomName = roomName.toLowerCase();
         // make user unique but not case insensitive
-        if(users.getUserList(params.room).indexOf(params.name)!== -1){
+        if(users.getUserList(roomName).indexOf(params.name)!== -1){
             callback('Name already used');
         }
 
-        //
-        socket.join(params.room);
+
+        socket.join(roomName);
         users.removeUser(socket.id);
-        users.addUser(socket.id,params.name,params.room);
-        io.to(params.room).emit('updateUserList',users.getUserList(params.room));
+        users.addUser(socket.id,params.name,roomName);
+        io.to(roomName).emit('updateUserList',users.getUserList(roomName));
 
         socket.emit('newMessage',generateMessage('Admin','Welcome to the chat app'));
 
-        socket.broadcast.to(params.room).emit('newMessage',generateMessage('Admin',`User ${params.name} has joined`));
+        socket.broadcast.to(roomName).emit('newMessage',generateMessage('Admin',`User ${params.name} has joined`));
         callback();
     });
 
