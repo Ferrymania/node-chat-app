@@ -20,9 +20,19 @@ io.on('connection',(socket)=>{
 
 
     socket.on('join',(params,callback)=>{
+        
         if(!isRealString(params.name) || !isRealString(params.room)){
             callback('Name and room name are required');
         }
+        
+        // make room case insensitive
+        params.room = params.room.toLowerCase();
+        // make user unique but not case insensitive
+        if(users.getUserList(params.room).indexOf(params.name)!== -1){
+            callback('Name already used');
+        }
+
+        //
         socket.join(params.room);
         users.removeUser(socket.id);
         users.addUser(socket.id,params.name,params.room);
